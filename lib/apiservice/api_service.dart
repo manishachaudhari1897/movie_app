@@ -18,6 +18,7 @@ abstract class ApiService {
   static const topRated = "movie/top_rated?language=en-US&page=";
   static const upComing = "movie/upcoming?language=en-US&page=";
   static const genreList = "genre/movie/list?language=en";
+  static const movieDetails = "movie/";
 
   // static var httpClient = http.Client();
 
