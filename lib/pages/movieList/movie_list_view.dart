@@ -14,7 +14,6 @@ class MovieListView extends GetView<MovieListController> {
 
   @override
   Widget build(BuildContext context) {
-    print("${controller.isApiCall.value}");
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -27,6 +26,7 @@ class MovieListView extends GetView<MovieListController> {
             title: getHeaderView(context),
             bottom: TabBar(
               controller: controller.tabController,
+              isScrollable: false,
               indicatorPadding: const EdgeInsets.only(left: 15.0, right: 15.0),
               indicatorWeight: 1,
               indicatorColor: colorDarkRed,
@@ -40,24 +40,12 @@ class MovieListView extends GetView<MovieListController> {
                   fontSize: 14.0,
                   fontFamily: appFont,
                   fontWeight: FontWeight.normal),
-              tabs: const [
-                Tab(
-                  child: Text(
-                    "Popular",
-                  ),
-                ),
-                Tab(
-                  child: Text("Top Rated"),
-                ),
-                Tab(
-                  child: Text("Upcoming"),
-                ),
-              ],
+              tabs: controller.myTabs,
             ),
           ),
           body: Container(
-              decoration: BoxDecoration(color: colorWhite),
-              child: TabBarView(
+              decoration: const BoxDecoration(color: colorWhite),
+              child: Obx(() => TabBarView(
                 controller: controller.tabController,
                 children: [
                   /*controller.isSearchEnter.value
@@ -66,7 +54,8 @@ class MovieListView extends GetView<MovieListController> {
                     : const Center(child: Text("No Movies"))
                     : controller.followersCount.value != "0"
                     ? */
-                  getPopularMoviesList(context),
+                  controller.showType.value == "grid" ?
+                  getPopularMoviesGridView(context) : getPopularMoviesListView(context),
                   // : const Center(child: Text("No Movies")),
                   // controller.followersCount.value != "0"
                   //     ? getFollowerList()
@@ -77,14 +66,16 @@ class MovieListView extends GetView<MovieListController> {
                     : const Center(child: Text("No Movies"))
                     : controller.followingCount.value != "0"
                     ?*/
-                  getPopularMoviesList(context),
+                  controller.showType.value == "grid" ?
+                  getTopRatedMoviesGridView(context) : getTopRatedMoviesListView(context),
                   // : const Center(child: Text("No Movies")),
-                  getPopularMoviesList(context)
+                  controller.showType.value == "grid" ?
+                  getUpComingMoviesGridView(context) : getUpComingMoviesListView(context)
                   // controller.followingCount.value != "0"
                   //     ? getFollowingList()
                   //     : const Center(child: Text(noSearchFound)),
                 ],
-              ))),
+              )))),
     );
   }
 
@@ -163,12 +154,11 @@ class MovieListView extends GetView<MovieListController> {
     );
   }
 
-  getPopularMoviesList(BuildContext context) {
+  getPopularMoviesGridView(BuildContext context) {
     return Obx(() => controller.popularList.isEmpty
         ? const Offstage()
         : GridView.builder(
-      controller:
-      controller.listScrollController.value,
+      controller: controller.listScrollController.value,
       gridDelegate:
       const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -256,23 +246,21 @@ class MovieListView extends GetView<MovieListController> {
                             maxLines: 1,
                           ),
                           Text(
-                            "${controller.popularList[index].popularity ?? ""}",
+                            "Popularity: ${controller.popularList[index].popularity ?? ""}",
                             style: AppText.textRegular.copyWith(
                                 color: colorGreyLight,
-                                fontSize: 12.0,
-                                decoration: TextDecoration.lineThrough),
+                                fontSize: 12.0),
                             softWrap: true,
                             overflow: TextOverflow.fade,
                           ),
                           Text(
-                            controller.popularList[index].originalLanguage ??
-                                "",
+                          "Original Language : ${controller.popularList[index].originalLanguage ?? ""}",
                             style: AppText.textRegular
                                 .copyWith(color: primaryColor, fontSize: 12.0),
                             softWrap: true,
                           ),
                           Text(
-                            "vote_average : ${controller.popularList[index].voteAverage ?? ""}",
+                            "Average Vote : ${controller.popularList[index].voteAverage ?? ""}",
                             style: AppText.textRegular
                                 .copyWith(color: primaryColor, fontSize: 12.0),
                             softWrap: true,
@@ -285,5 +273,551 @@ class MovieListView extends GetView<MovieListController> {
               );
             },
           ));
+  }
+
+  getPopularMoviesListView(BuildContext context) {
+    return Obx(() => controller.popularList.isEmpty ? const Offstage() :
+    ListView.builder(
+        controller: controller.listScrollController.value,
+        itemCount: controller.popularList.length,
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            margin: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(5.0),
+                        topRight: Radius.circular(5.0)),
+                    child: SizedBox(
+                      height: 200,
+                      child: Container(
+                        decoration: const BoxDecoration(color: colorWhite),
+                        child: controller.popularList[index].posterPath
+                            .toString()
+                            .isEmpty
+                            ? SizedBox(
+                            width: double.infinity,
+                            height:
+                            MediaQuery.of(context).size.height * 2,
+                            child: const Icon(Icons.person))
+                            : SizedBox(
+                          width: double.infinity,
+                          height:
+                          MediaQuery.of(context).size.height * 2,
+                          child: getNetworkImageView(
+                            ApiService.imageBaseURL +
+                                controller.popularList[index].posterPath
+                                    .toString(),
+                            boxFit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.popularList[index].title ?? "",
+                      style: AppText.textBold.copyWith(color: primaryColor, fontSize: 16.0),
+                      softWrap: true,
+                    ).marginOnly(top: 15.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            controller.popularList[index].releaseDate ?? "",
+                            style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 14.0),
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          "Popularity: ${controller.popularList[index].popularity ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Original Language : ${controller.popularList[index].originalLanguage ?? ""}",                          style:
+                          AppText.textRegular.copyWith(color: colorGreyLight, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                        Text(
+                          "Average Vote : ${controller.popularList[index].voteAverage ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ).marginOnly(top: 5.0),
+                  ],
+                ).marginOnly(left: 10.0, right: 10.0, bottom: 15.0)
+              ],
+            ),
+          );
+        }));
+  }
+
+  getTopRatedMoviesGridView(BuildContext context) {
+    return Obx(() => controller.topRatedList.isEmpty
+        ? const Offstage()
+        : GridView.builder(
+      controller:
+      controller.listScrollController.value,
+      gridDelegate:
+      const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+          childAspectRatio: 1 / 1.8),
+      itemCount: controller.topRatedList.length,
+      padding: const EdgeInsets.symmetric(
+          horizontal: 24.0,
+          vertical: 12.0),
+            itemBuilder: (chatContext, index) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorGreyLight4,
+                  borderRadius: BorderRadius.circular(5.0),
+                  border: Border.all(color: colorGreyLight3, width: 1.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 25.0,
+                      spreadRadius: 2.0,
+                      offset: const Offset(
+                        0,
+                        2,
+                      ), //New
+                    )
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(5.0),
+                          topRight: Radius.circular(5.0)),
+                      child: SizedBox(
+                        height: 200,
+                        child: Container(
+                          decoration: const BoxDecoration(color: colorWhite),
+                          child: controller.topRatedList[index].posterPath
+                                  .toString()
+                                  .isEmpty
+                              ? SizedBox(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.height * 2,
+                                  child: const Icon(Icons.person))
+                              : SizedBox(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.height * 2,
+                                  child: getNetworkImageView(
+                                    ApiService.imageBaseURL +
+                                        controller.topRatedList[index].posterPath
+                                            .toString(),
+                                    height: 100,
+                                    width: 200,
+                                    boxFit: BoxFit.contain,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            controller.topRatedList[index].title ?? "",
+                            style: AppText.textBold
+                                .copyWith(color: primaryColor, fontSize: 16.0),
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            controller.topRatedList[index].releaseDate ?? "",
+                            style: AppText.textRegular.copyWith(
+                                color: primaryColor,
+                                fontSize: 14.0,
+                                overflow: TextOverflow.ellipsis),
+                            softWrap: true,
+                            maxLines: 1,
+                          ),
+                          Text(
+                            "Popularity: ${controller.topRatedList[index].popularity ?? ""}",
+                            style: AppText.textRegular.copyWith(
+                                color: colorGreyLight,
+                                fontSize: 12.0,
+                                decoration: TextDecoration.lineThrough),
+                            softWrap: true,
+                            overflow: TextOverflow.fade,
+                          ),
+                          Text(
+                            "Original Language : ${controller.topRatedList[index].originalLanguage ?? ""}",
+                            style: AppText.textRegular
+                                .copyWith(color: primaryColor, fontSize: 12.0),
+                            softWrap: true,
+                          ),
+                          Text(
+                            "Average Vote : ${controller.topRatedList[index].voteAverage ?? ""}",
+                            style: AppText.textRegular
+                                .copyWith(color: primaryColor, fontSize: 12.0),
+                            softWrap: true,
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          ));
+  }
+
+  getTopRatedMoviesListView(BuildContext context) {
+    return Obx(() => controller.topRatedList.isEmpty ? const Offstage() :
+    ListView.builder(
+        controller: controller.listScrollController.value,
+        itemCount: controller.topRatedList.length,
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            margin: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(5.0),
+                        topRight: Radius.circular(5.0)),
+                    child: SizedBox(
+                      height: 200,
+                      child: Container(
+                        decoration: const BoxDecoration(color: colorWhite),
+                        child: controller.topRatedList[index].posterPath
+                            .toString()
+                            .isEmpty
+                            ? SizedBox(
+                            width: double.infinity,
+                            height:
+                            MediaQuery.of(context).size.height * 2,
+                            child: const Icon(Icons.person))
+                            : SizedBox(
+                          width: double.infinity,
+                          height:
+                          MediaQuery.of(context).size.height * 2,
+                          child: getNetworkImageView(
+                            ApiService.imageBaseURL +
+                                controller.topRatedList[index].posterPath
+                                    .toString(),
+                            boxFit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.topRatedList[index].title ?? "",
+                      style: AppText.textBold.copyWith(color: primaryColor, fontSize: 16.0),
+                      softWrap: true,
+                    ).marginOnly(top: 15.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            controller.topRatedList[index].releaseDate ?? "",
+                            style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 14.0),
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          "Popularity: ${controller.topRatedList[index].popularity ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Original Language : ${controller.topRatedList[index].originalLanguage ?? ""}",                          style:
+                        AppText.textRegular.copyWith(color: colorGreyLight, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                        Text(
+                          "Average Vote : ${controller.topRatedList[index].voteAverage ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ).marginOnly(top: 5.0),
+                  ],
+                ).marginOnly(left: 10.0, right: 10.0, bottom: 15.0)
+              ],
+            ),
+          );
+        }));
+  }
+
+  getUpComingMoviesGridView(BuildContext context) {
+    return Obx(() => controller.upComingList.isEmpty
+        ? const Offstage()
+        : GridView.builder(
+      controller:
+      controller.listScrollController.value,
+      gridDelegate:
+      const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+          childAspectRatio: 1 / 1.8),
+      itemCount: controller.upComingList.length,
+      padding: const EdgeInsets.symmetric(
+          horizontal: 24.0,
+          vertical: 12.0),
+            itemBuilder: (chatContext, index) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorGreyLight4,
+                  borderRadius: BorderRadius.circular(5.0),
+                  border: Border.all(color: colorGreyLight3, width: 1.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 25.0,
+                      spreadRadius: 2.0,
+                      offset: const Offset(
+                        0,
+                        2,
+                      ), //New
+                    )
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(5.0),
+                          topRight: Radius.circular(5.0)),
+                      child: SizedBox(
+                        height: 200,
+                        child: Container(
+                          decoration: const BoxDecoration(color: colorWhite),
+                          child: controller.upComingList[index].posterPath
+                                  .toString()
+                                  .isEmpty
+                              ? SizedBox(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.height * 2,
+                                  child: const Icon(Icons.person))
+                              : SizedBox(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.height * 2,
+                                  child: getNetworkImageView(
+                                    ApiService.imageBaseURL +
+                                        controller.upComingList[index].posterPath
+                                            .toString(),
+                                    height: 100,
+                                    width: 200,
+                                    boxFit: BoxFit.contain,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            controller.upComingList[index].title ?? "",
+                            style: AppText.textBold
+                                .copyWith(color: primaryColor, fontSize: 16.0),
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            controller.upComingList[index].releaseDate ?? "",
+                            style: AppText.textRegular.copyWith(
+                                color: primaryColor,
+                                fontSize: 14.0,
+                                overflow: TextOverflow.ellipsis),
+                            softWrap: true,
+                            maxLines: 1,
+                          ),
+                          Text(
+                            "Popularity: ${controller.upComingList[index].popularity ?? ""}",
+                            style: AppText.textRegular.copyWith(
+                                color: colorGreyLight,
+                                fontSize: 12.0,
+                                decoration: TextDecoration.lineThrough),
+                            softWrap: true,
+                            overflow: TextOverflow.fade,
+                          ),
+                          Text(
+                            "Original Language : ${controller.upComingList[index].originalLanguage ?? ""}",
+                            style: AppText.textRegular
+                                .copyWith(color: primaryColor, fontSize: 12.0),
+                            softWrap: true,
+                          ),
+                          Text(
+                            "Average Vote : ${controller.upComingList[index].voteAverage ?? ""}",
+                            style: AppText.textRegular
+                                .copyWith(color: primaryColor, fontSize: 12.0),
+                            softWrap: true,
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          ));
+  }
+
+  getUpComingMoviesListView(BuildContext context) {
+    return Obx(() => controller.upComingList.isEmpty ? const Offstage() :
+    ListView.builder(
+        controller: controller.listScrollController.value,
+        itemCount: controller.upComingList.length,
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            margin: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(5.0),
+                        topRight: Radius.circular(5.0)),
+                    child: SizedBox(
+                      height: 200,
+                      child: Container(
+                        decoration: const BoxDecoration(color: colorWhite),
+                        child: controller.upComingList[index].posterPath
+                            .toString()
+                            .isEmpty
+                            ? SizedBox(
+                            width: double.infinity,
+                            height:
+                            MediaQuery.of(context).size.height * 2,
+                            child: const Icon(Icons.person))
+                            : SizedBox(
+                          width: double.infinity,
+                          height:
+                          MediaQuery.of(context).size.height * 2,
+                          child: getNetworkImageView(
+                            ApiService.imageBaseURL +
+                                controller.upComingList[index].posterPath
+                                    .toString(),
+                            boxFit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.upComingList[index].title ?? "",
+                      style: AppText.textBold.copyWith(color: primaryColor, fontSize: 16.0),
+                      softWrap: true,
+                    ).marginOnly(top: 15.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            controller.upComingList[index].releaseDate ?? "",
+                            style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 14.0),
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          "Popularity: ${controller.upComingList[index].popularity ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Original Language : ${controller.upComingList[index].originalLanguage ?? ""}",                          style:
+                        AppText.textRegular.copyWith(color: colorGreyLight, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                        Text(
+                          "Average Vote : ${controller.upComingList[index].voteAverage ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ).marginOnly(top: 5.0),
+                  ],
+                ).marginOnly(left: 10.0, right: 10.0, bottom: 15.0)
+              ],
+            ),
+          );
+        }));
   }
 }

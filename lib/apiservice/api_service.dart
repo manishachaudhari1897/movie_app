@@ -14,9 +14,9 @@ abstract class ApiService {
   static const userInactivate = 401;
   static const userDeleted = 402;
 
-  static const popular = "popular";
-  static const topRated = "top_rated";
-  static const upComing = "upcoming";
+  static const popular = "popular?language=en-US&page=";
+  static const topRated = "top_rated?language=en-US&page=";
+  static const upComing = "upcoming?language=en-US&page=";
 
   // static var httpClient = http.Client();
 

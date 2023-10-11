@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:movie_app/constant/app_fonst.dart';
 import 'package:movie_app/constant/app_text.dart';
 
+import 'app_images.dart';
+
 Future<bool> checkConnectivity() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult == ConnectivityResult.none) {
@@ -62,7 +64,7 @@ Widget getNetworkImageView(String imageURL,
     errorWidget: (context, url, error) => Container(
       width: width ?? double.infinity,
       height: height ?? double.infinity,
-      child: const Icon(Icons.person).marginAll(10.0),
+      child:  Image.asset(placeHolder2, fit: BoxFit.cover,)
     )
   );
 }
