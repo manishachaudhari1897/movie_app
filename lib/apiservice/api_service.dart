@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 abstract class ApiService {
-  static String baseUrl = "https://api.themoviedb.org/3/movie/";
+  static String baseUrl = "https://api.themoviedb.org/3/";
   static const imageBaseURL = "https://api.themoviedb.org/3";
 
 
@@ -14,9 +14,10 @@ abstract class ApiService {
   static const userInactivate = 401;
   static const userDeleted = 402;
 
-  static const popular = "popular?language=en-US&page=";
-  static const topRated = "top_rated?language=en-US&page=";
-  static const upComing = "upcoming?language=en-US&page=";
+  static const popular = "movie/popular?language=en-US&page=";
+  static const topRated = "movie/top_rated?language=en-US&page=";
+  static const upComing = "movie/upcoming?language=en-US&page=";
+  static const genreList = "genre/movie/list?language=en";
 
   // static var httpClient = http.Client();
 
