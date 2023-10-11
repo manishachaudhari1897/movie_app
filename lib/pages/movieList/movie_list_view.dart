@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -7,6 +9,7 @@ import 'package:movie_app/constant/app_fonst.dart';
 import 'package:movie_app/constant/app_images.dart';
 import 'package:movie_app/constant/app_text.dart';
 import 'package:movie_app/constant/componants.dart';
+import 'package:movie_app/model/movie_list_model_class.dart';
 import 'package:movie_app/pages/movieList/movie_list_controller.dart';
 
 class MovieListView extends GetView<MovieListController> {
@@ -48,32 +51,31 @@ class MovieListView extends GetView<MovieListController> {
               child: Obx(() => TabBarView(
                 controller: controller.tabController,
                 children: [
-                  /*controller.isSearchEnter.value
-                    ? controller.followersListOnSearch.isNotEmpty
-                    ? getFollowerListFromSearch()
-                    : const Center(child: Text("No Movies"))
-                    : controller.followersCount.value != "0"
-                    ? */
+                  controller.isSearchEnter.value
+                      ? controller.popularListOnSearch.isNotEmpty
+                      ? controller.showType.value == "grid" ? getSearchMoviesGridView(context, controller.popularListOnSearch) :
+                      getSearchMoviesListView(context, controller.popularListOnSearch)
+                      : const Center(child: Text("No Movies"))
+                      :
                   controller.showType.value == "grid" ?
                   getPopularMoviesGridView(context) : getPopularMoviesListView(context),
-                  // : const Center(child: Text("No Movies")),
-                  // controller.followersCount.value != "0"
-                  //     ? getFollowerList()
-                  //     : const Center(child: Text(noSearchFound)),
-                  /*controller.isSearchEnter.value
-                    ? controller.followingListOnSearch.isNotEmpty
-                    ? getFollowingListFromSearch()
-                    : const Center(child: Text("No Movies"))
-                    : controller.followingCount.value != "0"
-                    ?*/
-                  controller.showType.value == "grid" ?
+
+                  controller.isSearchEnter.value
+                      ? controller.topRatedListOnSearch.isNotEmpty
+                      ? controller.showType.value == "grid" ? getSearchMoviesGridView(context, controller.topRatedListOnSearch) :
+                  getSearchMoviesListView(context, controller.topRatedListOnSearch)
+                      : const Center(child: Text("No Movies"))
+                      : controller.showType.value == "grid" ?
                   getTopRatedMoviesGridView(context) : getTopRatedMoviesListView(context),
-                  // : const Center(child: Text("No Movies")),
-                  controller.showType.value == "grid" ?
+
+
+                  controller.isSearchEnter.value
+                      ? controller.upComingListOnSearch.isNotEmpty
+                      ? controller.showType.value == "grid" ? getSearchMoviesGridView(context, controller.upComingListOnSearch) :
+                  getSearchMoviesListView(context, controller.upComingListOnSearch)
+                      : const Center(child: Text("No Movies"))
+                      : controller.showType.value == "grid" ?
                   getUpComingMoviesGridView(context) : getUpComingMoviesListView(context)
-                  // controller.followingCount.value != "0"
-                  //     ? getFollowingList()
-                  //     : const Center(child: Text(noSearchFound)),
                 ],
               )))),
     );
@@ -121,7 +123,18 @@ class MovieListView extends GetView<MovieListController> {
                   enableInteractiveSelection: true,
                   textInputAction: TextInputAction.next,
                   maxLength: 35,
-                  onChanged: (value) {},
+                  onChanged: (value) {
+                    controller.popularListOnSearch.clear();
+                    controller.topRatedListOnSearch.clear();
+                    controller.upComingListOnSearch.clear();
+                    controller.isSearchEnter.value = !checkString(controller.searchEditController.value.text.trim());
+                    if (controller.searchEditController.value.text.trim().length > 1) {
+                      if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
+                      controller.debounce = Timer(const Duration(milliseconds: 500), () {
+                        controller.getSearchResult(controller.searchEditController.value.text);
+                      });
+                    }
+                  },
                   onFieldSubmitted: (value) {},
                 ),
               )),
@@ -149,7 +162,31 @@ class MovieListView extends GetView<MovieListController> {
                   ),
                 ),
               ),
-            ).marginOnly(left: 10.0, top: 15.0)),
+            ).marginOnly(left: 8.0, top: 15.0)),
+        GestureDetector(
+              onTap: () {
+                if (controller.showType.value == "grid") {
+                  controller.showType.value = "";
+                } else {
+                  controller.showType.value = "grid";
+                }
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 45.0,
+                width: 45.0,
+                decoration: BoxDecoration(
+                    border: Border.all(color: colorGreyLight3, width: 1.0),
+                    borderRadius: BorderRadius.circular(5.0),
+                    color: colorWhite),
+                child: Center(
+                  child: SvgPicture.asset(
+                    icFilter,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ).marginOnly(left: 8.0, top: 15.0),
       ],
     );
   }
@@ -808,6 +845,227 @@ class MovieListView extends GetView<MovieListController> {
                         ),
                         Text(
                           "Average Vote : ${controller.upComingList[index].voteAverage ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ).marginOnly(top: 5.0),
+                  ],
+                ).marginOnly(left: 10.0, right: 10.0, bottom: 15.0)
+              ],
+            ),
+          );
+        }));
+  }
+
+  getSearchMoviesGridView(BuildContext context, List<Results> list) {
+    return list.isEmpty
+        ? const Offstage()
+        : GridView.builder(
+      controller: controller.listScrollController.value,
+      gridDelegate:
+      const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+          childAspectRatio: 1 / 1.8),
+      itemCount: list.length,
+      padding: const EdgeInsets.symmetric(
+          horizontal: 24.0,
+          vertical: 12.0),
+      itemBuilder: (chatContext, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorGreyLight4,
+            borderRadius: BorderRadius.circular(5.0),
+            border: Border.all(color: colorGreyLight3, width: 1.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 25.0,
+                spreadRadius: 2.0,
+                offset: const Offset(
+                  0,
+                  2,
+                ), //New
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(5.0),
+                    topRight: Radius.circular(5.0)),
+                child: SizedBox(
+                  height: 200,
+                  child: Container(
+                    decoration: const BoxDecoration(color: colorWhite),
+                    child: list[index].posterPath
+                        .toString()
+                        .isEmpty
+                        ? SizedBox(
+                        width: double.infinity,
+                        height:
+                        MediaQuery.of(context).size.height * 2,
+                        child: Icon(Icons.person))
+                        : SizedBox(
+                      width: double.infinity,
+                      height:
+                      MediaQuery.of(context).size.height * 2,
+                      child: getNetworkImageView(
+                        ApiService.imageBaseURL +
+                            list[index].posterPath
+                                .toString(),
+                        height: 100,
+                        width: 200,
+                        boxFit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      list[index].title ?? "",
+                      style: AppText.textBold
+                          .copyWith(color: primaryColor, fontSize: 16.0),
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      list[index].releaseDate ?? "",
+                      style: AppText.textRegular.copyWith(
+                          color: primaryColor,
+                          fontSize: 14.0,
+                          overflow: TextOverflow.ellipsis),
+                      softWrap: true,
+                      maxLines: 1,
+                    ),
+                    Text(
+                      "Popularity: ${list[index].popularity ?? ""}",
+                      style: AppText.textRegular.copyWith(
+                          color: colorGreyLight,
+                          fontSize: 12.0),
+                      softWrap: true,
+                      overflow: TextOverflow.fade,
+                    ),
+                    Text(
+                      "Original Language : ${list[index].originalLanguage ?? ""}",
+                      style: AppText.textRegular
+                          .copyWith(color: primaryColor, fontSize: 12.0),
+                      softWrap: true,
+                    ),
+                    Text(
+                      "Average Vote : ${list[index].voteAverage ?? ""}",
+                      style: AppText.textRegular
+                          .copyWith(color: primaryColor, fontSize: 12.0),
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  getSearchMoviesListView(BuildContext context, List<Results> list) {
+    return Obx(() => list.isEmpty ? const Offstage() :
+    ListView.builder(
+        controller: controller.listScrollController.value,
+        itemCount: list.length,
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            margin: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(5.0),
+                        topRight: Radius.circular(5.0)),
+                    child: SizedBox(
+                      height: 200,
+                      child: Container(
+                        decoration: const BoxDecoration(color: colorWhite),
+                        child: list[index].posterPath
+                            .toString()
+                            .isEmpty
+                            ? SizedBox(
+                            width: double.infinity,
+                            height:
+                            MediaQuery.of(context).size.height * 2,
+                            child: const Icon(Icons.person))
+                            : SizedBox(
+                          width: double.infinity,
+                          height:
+                          MediaQuery.of(context).size.height * 2,
+                          child: getNetworkImageView(
+                            ApiService.imageBaseURL +
+                                list[index].posterPath
+                                    .toString(),
+                            boxFit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      list[index].title ?? "",
+                      style: AppText.textBold.copyWith(color: primaryColor, fontSize: 16.0),
+                      softWrap: true,
+                    ).marginOnly(top: 15.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            list[index].releaseDate ?? "",
+                            style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 14.0),
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          "Popularity: ${list[index].popularity ?? ""}",
+                          style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Original Language : ${list[index].originalLanguage ?? ""}",                          style:
+                        AppText.textRegular.copyWith(color: colorGreyLight, fontSize: 12.0),
+                          softWrap: true,
+                        ),
+                        Text(
+                          "Average Vote : ${list[index].voteAverage ?? ""}",
                           style: AppText.textRegular.copyWith(color: primaryColor, fontSize: 12.0),
                           softWrap: true,
                         ),

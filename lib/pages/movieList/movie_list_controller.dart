@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:movie_app/apiservice/api_service.dart';
@@ -13,6 +15,9 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
   final popularList = <Results>[].obs;
   final topRatedList = <Results>[].obs;
   final upComingList = <Results>[].obs;
+  final popularListOnSearch = <Results>[].obs;
+  final topRatedListOnSearch = <Results>[].obs;
+  final upComingListOnSearch = <Results>[].obs;
   final listScrollController = ScrollController().obs;
 
   final searchEditController = TextEditingController().obs;
@@ -24,13 +29,15 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
     const Tab(text: 'Upcoming'),
   ];
   final currentTabIndex = 0.obs;
-
+  final isSearchEnter = false.obs;
+  Timer? debounce;
 
   @override
   void onInit() {
     super.onInit();
     tabController = TabController(vsync: this, length: myTabs.length,initialIndex: 0,)
       ..addListener(() {
+        isSearchEnter.value = false;
         searchEditController.value.text = "";
         currentTabIndex.value = tabController.index;
       });
@@ -181,6 +188,49 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
           }
         }
       });
+    });
+  }
+
+  getSearchResult(String searchQuery) {
+    popularListOnSearch.clear();
+    topRatedListOnSearch.clear();
+    upComingListOnSearch.clear();
+    checkConnectivity().then((connectivity) async {
+      if (connectivity) {
+        if(popularList.value!=null) {
+          for (var i = 0; i < popularList.length; i++) {
+            if (popularList[i].title.toString().toLowerCase().contains(searchQuery.toLowerCase())) {
+              popularListOnSearch.add(popularList[i]);
+            }
+          }
+        }
+
+        if(topRatedList.value!=null) {
+          for (var i = 0; i < topRatedList.length; i++) {
+            if (topRatedList[i].title.toString().toLowerCase().contains(searchQuery.toLowerCase())) {
+              topRatedListOnSearch.add(topRatedList[i]);
+            }
+          }
+        }
+
+        if(upComingList.value!=null) {
+          for (var i = 0; i < upComingList.length; i++) {
+            if (upComingList[i].title.toString().toLowerCase().contains(searchQuery.toLowerCase())) {
+              upComingListOnSearch.add(upComingList[i]);
+            }
+          }
+        }
+
+        if(popularListOnSearch.isEmpty){
+          popularListOnSearch.clear();
+        }
+        if(topRatedListOnSearch.isEmpty){
+          topRatedListOnSearch.clear();
+        }
+        if(upComingListOnSearch.isEmpty){
+          upComingListOnSearch.clear();
+        }
+      }
     });
   }
 

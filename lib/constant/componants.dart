@@ -8,6 +8,8 @@ import 'package:movie_app/constant/app_text.dart';
 
 import 'app_images.dart';
 
+bool checkString(String? value) => value == null || value.toString().trim().isEmpty;
+
 Future<bool> checkConnectivity() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult == ConnectivityResult.none) {
