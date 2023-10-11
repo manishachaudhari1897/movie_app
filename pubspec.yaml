@@ -38,6 +38,8 @@ dependencies:
   get: ^4.6.6
   http: ^1.1.0
   connectivity_plus: ^5.0.0
+  cached_network_image: ^3.3.0
+  flutter_svg:
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +64,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/images/
+    - assets/images/ic_grid.svg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
