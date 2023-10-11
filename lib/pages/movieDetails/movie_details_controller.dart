@@ -8,11 +8,10 @@ class MovieDetailsController extends GetxController {
   final movieDetails = Rx<MovieDetailsModelClass?>(null);
   final movieId = "".obs;
 
-
   @override
   void onInit() {
     super.onInit();
-    if(Get.arguments != null) {
+    if (Get.arguments != null) {
       movieId.value = Get.arguments["movieId"] ?? "";
     }
     getPopularMovieList();
@@ -27,7 +26,7 @@ class MovieDetailsController extends GetxController {
         isApiCall.value = false;
         if (response != null) {
           MovieDetailsModelClass responseModel =
-          MovieDetailsModelClass.fromJson(response);
+              MovieDetailsModelClass.fromJson(response);
           if (responseModel != null) {
             movieDetails.value = responseModel;
           }
@@ -35,5 +34,4 @@ class MovieDetailsController extends GetxController {
       });
     });
   }
-
 }

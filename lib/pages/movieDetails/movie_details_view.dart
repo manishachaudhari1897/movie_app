@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:movie_app/apiservice/api_service.dart';
 import 'package:movie_app/constant/app_colors.dart';
+import 'package:movie_app/constant/app_fonst.dart';
 import 'package:movie_app/constant/app_images.dart';
 import 'package:movie_app/constant/app_text.dart';
 import 'package:movie_app/constant/componants.dart';
@@ -41,7 +42,8 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
                   textAlign: TextAlign.center,
                 ))),
         body: SafeArea(
-          child: Obx(() => controller.movieDetails != null
+          child: Obx(() => controller.isApiCall.value == false ?
+          controller.movieDetails.value != null
               ? SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -280,7 +282,17 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
                     ],
                   ).marginOnly(bottom: 20.0),
                 )
-              : const Offstage()),
+              : Center(
+                      child: Text(
+                        "No Data Found",
+                        style: AppText.textMedium.copyWith(
+                            fontSize: 24.0,
+                            fontFamily: appFont,
+                            color: primaryColor),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+              : const Center(child: CircularProgressIndicator(color: primaryColor))),
         ),
       ),
     );

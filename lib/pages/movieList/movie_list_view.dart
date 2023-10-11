@@ -50,44 +50,80 @@ class MovieListView extends GetView<MovieListController> {
           ),
           body: Container(
               decoration: const BoxDecoration(color: colorWhite),
-              child: Obx(() => TabBarView(
-                    controller: controller.tabController,
-                    children: [
-                      controller.isSearchEnter.value
-                          ? controller.popularListOnSearch.isNotEmpty
-                              ? controller.showType.value == "grid"
-                                  ? getSearchMoviesGridView(
-                                      context, controller.popularListOnSearch)
-                                  : getSearchMoviesListView(
-                                      context, controller.popularListOnSearch)
-                              : const Center(child: Text("No Movies"))
-                          : controller.showType.value == "grid"
-                              ? getPopularMoviesGridView(context)
-                              : getPopularMoviesListView(context),
-                      controller.isSearchEnter.value
-                          ? controller.topRatedListOnSearch.isNotEmpty
-                              ? controller.showType.value == "grid"
-                                  ? getSearchMoviesGridView(
-                                      context, controller.topRatedListOnSearch)
-                                  : getSearchMoviesListView(
-                                      context, controller.topRatedListOnSearch)
-                              : const Center(child: Text("No Movies"))
-                          : controller.showType.value == "grid"
-                              ? getTopRatedMoviesGridView(context)
-                              : getTopRatedMoviesListView(context),
-                      controller.isSearchEnter.value
-                          ? controller.upComingListOnSearch.isNotEmpty
-                              ? controller.showType.value == "grid"
-                                  ? getSearchMoviesGridView(
-                                      context, controller.upComingListOnSearch)
-                                  : getSearchMoviesListView(
-                                      context, controller.upComingListOnSearch)
-                              : const Center(child: Text("No Movies"))
-                          : controller.showType.value == "grid"
-                              ? getUpComingMoviesGridView(context)
-                              : getUpComingMoviesListView(context)
-                    ],
-                  )))),
+              child: Obx(() => controller.isApiCall.value == false
+                  ? TabBarView(
+                      controller: controller.tabController,
+                      children: [
+                        controller.isSearchEnter.value
+                            ? controller.popularListOnSearch.isNotEmpty
+                                ? controller.showType.value == "grid"
+                                    ? getSearchMoviesGridView(
+                                        context, controller.popularListOnSearch)
+                                    : getSearchMoviesListView(
+                                        context, controller.popularListOnSearch)
+                                : const Center(child: Text("No Data Found"))
+                            : controller.popularList.isNotEmpty
+                                ? controller.showType.value == "grid"
+                                    ? getPopularMoviesGridView(context)
+                                    : getPopularMoviesListView(context)
+                                : Center(
+                                    child: Text(
+                                      "No Data Found",
+                                      style: AppText.textMedium.copyWith(
+                                          fontSize: 24.0,
+                                          fontFamily: appFont,
+                                          color: primaryColor),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                        controller.isSearchEnter.value
+                            ? controller.topRatedListOnSearch.isNotEmpty
+                                ? controller.showType.value == "grid"
+                                    ? getSearchMoviesGridView(context,
+                                        controller.topRatedListOnSearch)
+                                    : getSearchMoviesListView(context,
+                                        controller.topRatedListOnSearch)
+                                : const Center(child: Text("No Data Found"))
+                            : controller.topRatedList.isNotEmpty
+                                ? controller.showType.value == "grid"
+                                    ? getTopRatedMoviesGridView(context)
+                                    : getTopRatedMoviesListView(context)
+                                : Center(
+                                    child: Text(
+                                      "No Data Found",
+                                      style: AppText.textMedium.copyWith(
+                                          fontSize: 24.0,
+                                          fontFamily: appFont,
+                                          color: primaryColor),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                        controller.isSearchEnter.value
+                            ? controller.upComingListOnSearch.isNotEmpty
+                                ? controller.showType.value == "grid"
+                                    ? getSearchMoviesGridView(context,
+                                        controller.upComingListOnSearch)
+                                    : getSearchMoviesListView(context,
+                                        controller.upComingListOnSearch)
+                                : const Center(child: Text("No Data Found"))
+                            : controller.upComingList.isNotEmpty
+                                ? controller.showType.value == "grid"
+                                    ? getUpComingMoviesGridView(context)
+                                    : getUpComingMoviesListView(context)
+                                : Center(
+                                    child: Text(
+                                      "No Data Found",
+                                      style: AppText.textMedium.copyWith(
+                                          fontSize: 24.0,
+                                          fontFamily: appFont,
+                                          color: primaryColor),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                      ],
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(color: primaryColor))))),
     );
   }
 
@@ -181,32 +217,33 @@ class MovieListView extends GetView<MovieListController> {
               ),
             ).marginOnly(left: 8.0, top: 15.0)),
         GestureDetector(
-              onTap: () {
-                controller.isSearchEnter.value = false;
-                showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    constraints: BoxConstraints.loose(Size(double.infinity, MediaQuery.of(context).size.height * 0.7)),
-                    builder: (context) => FilterByGenreBtmSheet(movieListController: controller,));
-
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                height: 45.0,
-                width: 45.0,
-                decoration: BoxDecoration(
-                    border: Border.all(color: colorGreyLight3, width: 1.0),
-                    borderRadius: BorderRadius.circular(5.0),
-                    color: colorWhite),
-                child: Center(
-                  child: SvgPicture.asset(
-                    icFilter,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+          onTap: () {
+            controller.isSearchEnter.value = false;
+            showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                constraints: BoxConstraints.loose(Size(
+                    double.infinity, MediaQuery.of(context).size.height * 0.7)),
+                builder: (context) => FilterByGenreBtmSheet(
+                      movieListController: controller,
+                    ));
+          },
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            height: 45.0,
+            width: 45.0,
+            decoration: BoxDecoration(
+                border: Border.all(color: colorGreyLight3, width: 1.0),
+                borderRadius: BorderRadius.circular(5.0),
+                color: colorWhite),
+            child: Center(
+              child: SvgPicture.asset(
+                icFilter,
+                fit: BoxFit.contain,
               ),
-            ).marginOnly(left: 8.0, top: 15.0)
-
+            ),
+          ),
+        ).marginOnly(left: 8.0, top: 15.0)
       ],
     );
   }
@@ -228,7 +265,7 @@ class MovieListView extends GetView<MovieListController> {
               return InkWell(
                 onTap: () {
                   Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : controller.popularList[index].id.toString()
+                    "movieId": controller.popularList[index].id.toString()
                   });
                 },
                 child: Container(
@@ -274,7 +311,8 @@ class MovieListView extends GetView<MovieListController> {
                                         MediaQuery.of(context).size.height * 2,
                                     child: getNetworkImageView(
                                       ApiService.imageBaseURL +
-                                          controller.popularList[index].posterPath
+                                          controller
+                                              .popularList[index].posterPath
                                               .toString(),
                                       height: 100,
                                       width: 200,
@@ -292,8 +330,8 @@ class MovieListView extends GetView<MovieListController> {
                           children: [
                             Text(
                               controller.popularList[index].title ?? "",
-                              style: AppText.textBold
-                                  .copyWith(color: primaryColor, fontSize: 16.0),
+                              style: AppText.textBold.copyWith(
+                                  color: primaryColor, fontSize: 16.0),
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -315,14 +353,14 @@ class MovieListView extends GetView<MovieListController> {
                             ),
                             Text(
                               "Original Language : ${controller.popularList[index].originalLanguage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                             Text(
                               "Average Vote : ${controller.popularList[index].voteAverage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                           ],
@@ -348,7 +386,7 @@ class MovieListView extends GetView<MovieListController> {
               return InkWell(
                 onTap: () {
                   Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : controller.popularList[index].id.toString()
+                    "movieId": controller.popularList[index].id.toString()
                   });
                 },
                 child: Card(
@@ -365,19 +403,22 @@ class MovieListView extends GetView<MovieListController> {
                           child: SizedBox(
                             height: 300,
                             child: Container(
-                              decoration: const BoxDecoration(color: colorWhite),
+                              decoration:
+                                  const BoxDecoration(color: colorWhite),
                               child: controller.popularList[index].posterPath
                                       .toString()
                                       .isEmpty
                                   ? SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: const Icon(Icons.person))
                                   : SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: getNetworkImageView(
                                         ApiService.imageBaseURL +
                                             controller
@@ -407,7 +448,8 @@ class MovieListView extends GetView<MovieListController> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  controller.popularList[index].releaseDate ?? "",
+                                  controller.popularList[index].releaseDate ??
+                                      "",
                                   style: AppText.textRegular.copyWith(
                                       color: primaryColor, fontSize: 14.0),
                                   softWrap: true,
@@ -467,7 +509,7 @@ class MovieListView extends GetView<MovieListController> {
               return InkWell(
                 onTap: () {
                   Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : controller.topRatedList[index].id.toString()
+                    "movieId": controller.topRatedList[index].id.toString()
                   });
                 },
                 child: Container(
@@ -532,8 +574,8 @@ class MovieListView extends GetView<MovieListController> {
                           children: [
                             Text(
                               controller.topRatedList[index].title ?? "",
-                              style: AppText.textBold
-                                  .copyWith(color: primaryColor, fontSize: 16.0),
+                              style: AppText.textBold.copyWith(
+                                  color: primaryColor, fontSize: 16.0),
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -557,14 +599,14 @@ class MovieListView extends GetView<MovieListController> {
                             ),
                             Text(
                               "Original Language : ${controller.topRatedList[index].originalLanguage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                             Text(
                               "Average Vote : ${controller.topRatedList[index].voteAverage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                           ],
@@ -590,7 +632,7 @@ class MovieListView extends GetView<MovieListController> {
               return InkWell(
                 onTap: () {
                   Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : controller.topRatedList[index].id.toString()
+                    "movieId": controller.topRatedList[index].id.toString()
                   });
                 },
                 child: Card(
@@ -607,19 +649,22 @@ class MovieListView extends GetView<MovieListController> {
                           child: SizedBox(
                             height: 300,
                             child: Container(
-                              decoration: const BoxDecoration(color: colorWhite),
+                              decoration:
+                                  const BoxDecoration(color: colorWhite),
                               child: controller.topRatedList[index].posterPath
                                       .toString()
                                       .isEmpty
                                   ? SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: const Icon(Icons.person))
                                   : SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: getNetworkImageView(
                                         ApiService.imageBaseURL +
                                             controller
@@ -710,7 +755,7 @@ class MovieListView extends GetView<MovieListController> {
               return InkWell(
                 onTap: () {
                   Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : controller.upComingList[index].id.toString()
+                    "movieId": controller.upComingList[index].id.toString()
                   });
                 },
                 child: Container(
@@ -775,8 +820,8 @@ class MovieListView extends GetView<MovieListController> {
                           children: [
                             Text(
                               controller.upComingList[index].title ?? "",
-                              style: AppText.textBold
-                                  .copyWith(color: primaryColor, fontSize: 16.0),
+                              style: AppText.textBold.copyWith(
+                                  color: primaryColor, fontSize: 16.0),
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -800,14 +845,14 @@ class MovieListView extends GetView<MovieListController> {
                             ),
                             Text(
                               "Original Language : ${controller.upComingList[index].originalLanguage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                             Text(
                               "Average Vote : ${controller.upComingList[index].voteAverage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                           ],
@@ -833,7 +878,7 @@ class MovieListView extends GetView<MovieListController> {
               return InkWell(
                 onTap: () {
                   Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : controller.upComingList[index].id.toString()
+                    "movieId": controller.upComingList[index].id.toString()
                   });
                 },
                 child: Card(
@@ -850,19 +895,22 @@ class MovieListView extends GetView<MovieListController> {
                           child: SizedBox(
                             height: 300,
                             child: Container(
-                              decoration: const BoxDecoration(color: colorWhite),
+                              decoration:
+                                  const BoxDecoration(color: colorWhite),
                               child: controller.upComingList[index].posterPath
                                       .toString()
                                       .isEmpty
                                   ? SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: const Icon(Icons.person))
                                   : SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: getNetworkImageView(
                                         ApiService.imageBaseURL +
                                             controller
@@ -952,9 +1000,8 @@ class MovieListView extends GetView<MovieListController> {
             itemBuilder: (chatContext, index) {
               return InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : list[index].id.toString()
-                  });
+                  Get.toNamed(Routes.movieDetails,
+                      arguments: {"movieId": list[index].id.toString()});
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -1014,8 +1061,8 @@ class MovieListView extends GetView<MovieListController> {
                           children: [
                             Text(
                               list[index].title ?? "",
-                              style: AppText.textBold
-                                  .copyWith(color: primaryColor, fontSize: 16.0),
+                              style: AppText.textBold.copyWith(
+                                  color: primaryColor, fontSize: 16.0),
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1037,14 +1084,14 @@ class MovieListView extends GetView<MovieListController> {
                             ),
                             Text(
                               "Original Language : ${list[index].originalLanguage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                             Text(
                               "Average Vote : ${list[index].voteAverage ?? ""}",
-                              style: AppText.textRegular
-                                  .copyWith(color: primaryColor, fontSize: 12.0),
+                              style: AppText.textRegular.copyWith(
+                                  color: primaryColor, fontSize: 12.0),
                               softWrap: true,
                             ),
                           ],
@@ -1069,9 +1116,8 @@ class MovieListView extends GetView<MovieListController> {
             itemBuilder: (BuildContext context, int index) {
               return InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.movieDetails, arguments: {
-                    "movieId" : list[index].id.toString()
-                  });
+                  Get.toNamed(Routes.movieDetails,
+                      arguments: {"movieId": list[index].id.toString()});
                 },
                 child: Card(
                   margin: const EdgeInsets.all(15.0),
@@ -1087,17 +1133,20 @@ class MovieListView extends GetView<MovieListController> {
                           child: SizedBox(
                             height: 300,
                             child: Container(
-                              decoration: const BoxDecoration(color: colorWhite),
+                              decoration:
+                                  const BoxDecoration(color: colorWhite),
                               child: list[index].posterPath.toString().isEmpty
                                   ? SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: const Icon(Icons.person))
                                   : SizedBox(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height * 2,
+                                          MediaQuery.of(context).size.height *
+                                              2,
                                       child: getNetworkImageView(
                                         ApiService.imageBaseURL +
                                             list[index].posterPath.toString(),

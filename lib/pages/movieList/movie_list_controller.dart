@@ -6,9 +6,9 @@ import 'package:movie_app/apiservice/api_service.dart';
 import 'package:movie_app/constant/componants.dart';
 import 'package:movie_app/model/genre_model_class.dart';
 import 'package:movie_app/model/movie_list_model_class.dart';
-import 'package:movie_app/pages/movieList/bottomsheet/filter_by_genre_bottom_sheet.dart';
 
-class MovieListController extends GetxController with GetSingleTickerProviderStateMixin {
+class MovieListController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   final isApiCall = false.obs;
   final isApiPagination = false.obs;
   final nextPaginationPopularValue = "".obs;
@@ -39,8 +39,11 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(vsync: this, length: myTabs.length,initialIndex: 0,)
-      ..addListener(() {
+    tabController = TabController(
+      vsync: this,
+      length: myTabs.length,
+      initialIndex: 0,
+    )..addListener(() {
         isSearchEnter.value = false;
         searchEditController.value.text = "";
         currentTabIndex.value = tabController.index;
@@ -59,32 +62,29 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
     listScrollController.value.addListener(() {
       if (listScrollController.value.position.maxScrollExtent ==
           listScrollController.value.position.pixels) {
-
-        if(currentTabIndex.value == 0) {
+        if (currentTabIndex.value == 0) {
           if (nextPaginationPopularValue.value.isNotEmpty) {
             print("object=> Scroller Controller reached");
             getPopularMovieList(isPagination: true);
           }
         }
 
-        if(currentTabIndex.value == 1) {
+        if (currentTabIndex.value == 1) {
           if (nextPaginationTopRatedValue.value.isNotEmpty) {
             print("object=> Scroller Controller reached");
             getTopRatedMovieList(isPagination: true);
           }
         }
 
-        if(currentTabIndex.value == 2) {
+        if (currentTabIndex.value == 2) {
           if (nextPaginationUpComingValue.value.isNotEmpty) {
             print("object=> Scroller Controller reached");
             getUpComingMovieList(isPagination: true);
           }
         }
-
       }
     });
   }
-
 
   getPopularMovieList({bool isPagination = false}) {
     checkConnectivity().then((connectivity) {
@@ -93,7 +93,8 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
       } else {
         isApiCall.value = true;
       }
-      ApiService.callGetApi("${ApiService.popular}${nextPaginationPopularValue.value}", () {
+      ApiService.callGetApi(
+          "${ApiService.popular}${nextPaginationPopularValue.value}", () {
         if (isPagination) {
           isApiPagination.value = false;
         } else {
@@ -107,7 +108,7 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
         }
         if (response != null) {
           MovieListModelClass responseModel =
-          MovieListModelClass.fromJson(response);
+              MovieListModelClass.fromJson(response);
           if (responseModel != null) {
             if (isPagination) {
               popularList.addAll(responseModel.results ?? []);
@@ -115,8 +116,10 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
               popularList.value = responseModel.results ?? [];
             }
             print("popularList ===> $popularList");
-            nextPaginationPopularValue.value = (responseModel.page! + 1).toString();
-            print("nextPaginationPopularValue ===> ${nextPaginationPopularValue.value}");
+            nextPaginationPopularValue.value =
+                (responseModel.page! + 1).toString();
+            print(
+                "nextPaginationPopularValue ===> ${nextPaginationPopularValue.value}");
           }
         }
       });
@@ -130,7 +133,8 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
       } else {
         isApiCall.value = true;
       }
-      ApiService.callGetApi("${ApiService.topRated}${nextPaginationTopRatedValue.value}", () {
+      ApiService.callGetApi(
+          "${ApiService.topRated}${nextPaginationTopRatedValue.value}", () {
         if (isPagination) {
           isApiPagination.value = false;
         } else {
@@ -144,7 +148,7 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
         }
         if (response != null) {
           MovieListModelClass responseModel =
-          MovieListModelClass.fromJson(response);
+              MovieListModelClass.fromJson(response);
           if (responseModel != null) {
             if (isPagination) {
               topRatedList.addAll(responseModel.results ?? []);
@@ -152,8 +156,10 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
               topRatedList.value = responseModel.results ?? [];
             }
             print("popularList ===> $topRatedList");
-            nextPaginationTopRatedValue.value = (responseModel.page! + 1).toString();
-            print("nextPaginationPopularValue ===> ${nextPaginationTopRatedValue.value}");
+            nextPaginationTopRatedValue.value =
+                (responseModel.page! + 1).toString();
+            print(
+                "nextPaginationPopularValue ===> ${nextPaginationTopRatedValue.value}");
           }
         }
       });
@@ -167,7 +173,8 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
       } else {
         isApiCall.value = true;
       }
-      ApiService.callGetApi("${ApiService.upComing}${nextPaginationUpComingValue.value}", () {
+      ApiService.callGetApi(
+          "${ApiService.upComing}${nextPaginationUpComingValue.value}", () {
         if (isPagination) {
           isApiPagination.value = false;
         } else {
@@ -181,7 +188,7 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
         }
         if (response != null) {
           MovieListModelClass responseModel =
-          MovieListModelClass.fromJson(response);
+              MovieListModelClass.fromJson(response);
           if (responseModel != null) {
             if (isPagination) {
               upComingList.addAll(responseModel.results ?? []);
@@ -189,8 +196,10 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
               upComingList.value = responseModel.results ?? [];
             }
             print("popularList ===> $upComingList");
-            nextPaginationUpComingValue.value = (responseModel.page! + 1).toString();
-            print("nextPaginationPopularValue ===> ${nextPaginationUpComingValue.value}");
+            nextPaginationUpComingValue.value =
+                (responseModel.page! + 1).toString();
+            print(
+                "nextPaginationPopularValue ===> ${nextPaginationUpComingValue.value}");
           }
         }
       });
@@ -203,37 +212,49 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
     upComingListOnSearch.clear();
     checkConnectivity().then((connectivity) async {
       if (connectivity) {
-        if(popularList.value!=null) {
+        if (popularList.value != null) {
           for (var i = 0; i < popularList.length; i++) {
-            if (popularList[i].title.toString().toLowerCase().contains(searchQuery.toLowerCase())) {
+            if (popularList[i]
+                .title
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase())) {
               popularListOnSearch.add(popularList[i]);
             }
           }
         }
 
-        if(topRatedList.value!=null) {
+        if (topRatedList.value != null) {
           for (var i = 0; i < topRatedList.length; i++) {
-            if (topRatedList[i].title.toString().toLowerCase().contains(searchQuery.toLowerCase())) {
+            if (topRatedList[i]
+                .title
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase())) {
               topRatedListOnSearch.add(topRatedList[i]);
             }
           }
         }
 
-        if(upComingList.value!=null) {
+        if (upComingList.value != null) {
           for (var i = 0; i < upComingList.length; i++) {
-            if (upComingList[i].title.toString().toLowerCase().contains(searchQuery.toLowerCase())) {
+            if (upComingList[i]
+                .title
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase())) {
               upComingListOnSearch.add(upComingList[i]);
             }
           }
         }
 
-        if(popularListOnSearch.isEmpty){
+        if (popularListOnSearch.isEmpty) {
           popularListOnSearch.clear();
         }
-        if(topRatedListOnSearch.isEmpty){
+        if (topRatedListOnSearch.isEmpty) {
           topRatedListOnSearch.clear();
         }
-        if(upComingListOnSearch.isEmpty){
+        if (upComingListOnSearch.isEmpty) {
           upComingListOnSearch.clear();
         }
       }
@@ -244,36 +265,47 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
     popularListOnSearch.clear();
     topRatedListOnSearch.clear();
     upComingListOnSearch.clear();
-    if(genreList.value!=null) {
-        for(var k = 0; k < popularList.length; k++) {
-          for(var j = 0; j < popularList[k].genreIds!.length; j++) {
-            if (popularList[k].genreIds![j].toString().toLowerCase().contains(genreList[index].id.toString())) {
-              popularListOnSearch.add(popularList[k]);
-            }
-          }
-        }
-    }
-
-    if(genreList.value!=null) {
-        for(var k = 0; k < topRatedList.length; k++) {
-          for(var j = 0; j < topRatedList[k].genreIds!.length; j++) {
-            if (topRatedList[k].genreIds![j].toString().toLowerCase().contains(genreList[index].id.toString())) {
-              topRatedListOnSearch.add(topRatedList[k]);
-            }
-          }
-        }
-    }
-
-    if(genreList.value!=null) {
-      for(var k = 0; k < upComingList.length; k++) {
-        for(var j = 0; j < upComingList[k].genreIds!.length; j++) {
-          if (upComingList[k].genreIds![j].toString().toLowerCase().contains(genreList[index].id.toString())) {
-            upComingListOnSearch.add(upComingList[k]);
+    if (genreList.value != null) {
+      for (var k = 0; k < popularList.length; k++) {
+        for (var j = 0; j < popularList[k].genreIds!.length; j++) {
+          if (popularList[k]
+              .genreIds![j]
+              .toString()
+              .toLowerCase()
+              .contains(genreList[index].id.toString())) {
+            popularListOnSearch.add(popularList[k]);
           }
         }
       }
     }
 
+    if (genreList.value != null) {
+      for (var k = 0; k < topRatedList.length; k++) {
+        for (var j = 0; j < topRatedList[k].genreIds!.length; j++) {
+          if (topRatedList[k]
+              .genreIds![j]
+              .toString()
+              .toLowerCase()
+              .contains(genreList[index].id.toString())) {
+            topRatedListOnSearch.add(topRatedList[k]);
+          }
+        }
+      }
+    }
+
+    if (genreList.value != null) {
+      for (var k = 0; k < upComingList.length; k++) {
+        for (var j = 0; j < upComingList[k].genreIds!.length; j++) {
+          if (upComingList[k]
+              .genreIds![j]
+              .toString()
+              .toLowerCase()
+              .contains(genreList[index].id.toString())) {
+            upComingListOnSearch.add(upComingList[k]);
+          }
+        }
+      }
+    }
   }
 
   getGenreList() {
@@ -284,8 +316,7 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
       }).then((response) {
         isApiCall.value = false;
         if (response != null) {
-          GenreModelClass responseModel =
-          GenreModelClass.fromJson(response);
+          GenreModelClass responseModel = GenreModelClass.fromJson(response);
           if (responseModel != null) {
             genreList.value = responseModel.genres ?? [];
           }
@@ -293,5 +324,4 @@ class MovieListController extends GetxController with GetSingleTickerProviderSta
       });
     });
   }
-
 }
