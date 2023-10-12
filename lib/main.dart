@@ -5,7 +5,7 @@ import 'package:movie_app/routes/app_routes.dart';
 
 import 'constant/app_fonst.dart';
 
-void main() {
+Future<void> main() async {
   runApp(const MyApp());
 }
 

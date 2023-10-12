@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:movie_app/apiservice/api_service.dart';
 import 'package:movie_app/constant/componants.dart';
 import 'package:movie_app/model/genre_model_class.dart';
@@ -88,121 +90,133 @@ class MovieListController extends GetxController
 
   getPopularMovieList({bool isPagination = false}) {
     checkConnectivity().then((connectivity) {
-      if (isPagination) {
-        isApiPagination.value = true;
-      } else {
-        isApiCall.value = true;
-      }
-      ApiService.callGetApi(
-          "${ApiService.popular}${nextPaginationPopularValue.value}", () {
+      if(connectivity == true) {
         if (isPagination) {
-          isApiPagination.value = false;
+          isApiPagination.value = true;
         } else {
-          isApiCall.value = false;
+          isApiCall.value = true;
         }
-      }).then((response) {
-        if (isPagination) {
-          isApiPagination.value = false;
-        } else {
-          isApiCall.value = false;
-        }
-        if (response != null) {
-          MovieListModelClass responseModel =
-              MovieListModelClass.fromJson(response);
-          if (responseModel != null) {
-            if (isPagination) {
-              popularList.addAll(responseModel.results ?? []);
-            } else {
-              popularList.value = responseModel.results ?? [];
-            }
-            print("popularList ===> $popularList");
-            nextPaginationPopularValue.value =
-                (responseModel.page! + 1).toString();
-            print(
-                "nextPaginationPopularValue ===> ${nextPaginationPopularValue.value}");
+        ApiService.callGetApi(
+            "${ApiService.popular}${nextPaginationPopularValue.value}", () {
+          if (isPagination) {
+            isApiPagination.value = false;
+          } else {
+            isApiCall.value = false;
           }
-        }
-      });
+        }).then((response) async {
+          if (isPagination) {
+            isApiPagination.value = false;
+          } else {
+            isApiCall.value = false;
+          }
+          if (response != null) {
+            MovieListModelClass responseModel =
+            MovieListModelClass.fromJson(response);
+            if (responseModel != null) {
+              if (isPagination) {
+                popularList.addAll(responseModel.results ?? []);
+              } else {
+                popularList.value = responseModel.results ?? [];
+              }
+              print("popularList ===> $popularList");
+              nextPaginationPopularValue.value =
+                  (responseModel.page! + 1).toString();
+              print(
+                  "nextPaginationPopularValue ===> ${nextPaginationPopularValue.value}");
+            }
+          }
+        });
+      } else {
+        isApiCall.value = false;
+      }
     });
   }
 
   getTopRatedMovieList({bool isPagination = false}) {
     checkConnectivity().then((connectivity) {
-      if (isPagination) {
-        isApiPagination.value = true;
-      } else {
-        isApiCall.value = true;
-      }
-      ApiService.callGetApi(
-          "${ApiService.topRated}${nextPaginationTopRatedValue.value}", () {
+      if(connectivity == true) {
         if (isPagination) {
-          isApiPagination.value = false;
+          isApiPagination.value = true;
         } else {
-          isApiCall.value = false;
+          isApiCall.value = true;
         }
-      }).then((response) {
-        if (isPagination) {
-          isApiPagination.value = false;
-        } else {
-          isApiCall.value = false;
-        }
-        if (response != null) {
-          MovieListModelClass responseModel =
-              MovieListModelClass.fromJson(response);
-          if (responseModel != null) {
-            if (isPagination) {
-              topRatedList.addAll(responseModel.results ?? []);
-            } else {
-              topRatedList.value = responseModel.results ?? [];
-            }
-            print("popularList ===> $topRatedList");
-            nextPaginationTopRatedValue.value =
-                (responseModel.page! + 1).toString();
-            print(
-                "nextPaginationPopularValue ===> ${nextPaginationTopRatedValue.value}");
+        ApiService.callGetApi(
+            "${ApiService.topRated}${nextPaginationTopRatedValue.value}", () {
+          if (isPagination) {
+            isApiPagination.value = false;
+          } else {
+            isApiCall.value = false;
           }
-        }
-      });
+        }).then((response) {
+          if (isPagination) {
+            isApiPagination.value = false;
+          } else {
+            isApiCall.value = false;
+          }
+          if (response != null) {
+            MovieListModelClass responseModel =
+            MovieListModelClass.fromJson(response);
+            if (responseModel != null) {
+              if (isPagination) {
+                topRatedList.addAll(responseModel.results ?? []);
+              } else {
+                topRatedList.value = responseModel.results ?? [];
+              }
+              print("popularList ===> $topRatedList");
+              nextPaginationTopRatedValue.value =
+                  (responseModel.page! + 1).toString();
+              print(
+                  "nextPaginationPopularValue ===> ${nextPaginationTopRatedValue.value}");
+            }
+          }
+        });
+      } else {
+        isApiCall.value = false;
+      }
     });
   }
 
   getUpComingMovieList({bool isPagination = false}) {
     checkConnectivity().then((connectivity) {
-      if (isPagination) {
-        isApiPagination.value = true;
-      } else {
-        isApiCall.value = true;
-      }
-      ApiService.callGetApi(
-          "${ApiService.upComing}${nextPaginationUpComingValue.value}", () {
+      if(connectivity == true) {
         if (isPagination) {
-          isApiPagination.value = false;
+          isApiPagination.value = true;
         } else {
-          isApiCall.value = false;
+          isApiCall.value = true;
         }
-      }).then((response) {
-        if (isPagination) {
-          isApiPagination.value = false;
-        } else {
-          isApiCall.value = false;
-        }
-        if (response != null) {
-          MovieListModelClass responseModel =
-              MovieListModelClass.fromJson(response);
-          if (responseModel != null) {
-            if (isPagination) {
-              upComingList.addAll(responseModel.results ?? []);
-            } else {
-              upComingList.value = responseModel.results ?? [];
-            }
-            print("popularList ===> $upComingList");
-            nextPaginationUpComingValue.value =
-                (responseModel.page! + 1).toString();
-            print(
-                "nextPaginationPopularValue ===> ${nextPaginationUpComingValue.value}");
+        ApiService.callGetApi(
+            "${ApiService.upComing}${nextPaginationUpComingValue.value}", () {
+          if (isPagination) {
+            isApiPagination.value = false;
+          } else {
+            isApiCall.value = false;
           }
-        }
-      });
+        }).then((response) {
+          if (isPagination) {
+            isApiPagination.value = false;
+          } else {
+            isApiCall.value = false;
+          }
+          if (response != null) {
+            MovieListModelClass responseModel =
+            MovieListModelClass.fromJson(response);
+            if (responseModel != null) {
+              if (isPagination) {
+                upComingList.addAll(responseModel.results ?? []);
+              } else {
+                upComingList.value = responseModel.results ?? [];
+              }
+              print("popularList ===> $upComingList");
+              nextPaginationUpComingValue.value =
+                  (responseModel.page! + 1).toString();
+              print(
+                  "nextPaginationPopularValue ===> ${nextPaginationUpComingValue.value}");
+            }
+          }
+        });
+      } else {
+        isApiCall.value = false;
+      }
     });
   }
 

@@ -19,19 +19,23 @@ class MovieDetailsController extends GetxController {
 
   getPopularMovieList() {
     checkConnectivity().then((connectivity) {
-      isApiCall.value = true;
-      ApiService.callGetApi("${ApiService.movieDetails}${movieId.value}", () {
-        isApiCall.value = false;
-      }).then((response) {
-        isApiCall.value = false;
-        if (response != null) {
-          MovieDetailsModelClass responseModel =
-              MovieDetailsModelClass.fromJson(response);
-          if (responseModel != null) {
-            movieDetails.value = responseModel;
+      if(connectivity == true) {
+        isApiCall.value = true;
+        ApiService.callGetApi("${ApiService.movieDetails}${movieId.value}", () {
+          isApiCall.value = false;
+        }).then((response) {
+          isApiCall.value = false;
+          if (response != null) {
+            MovieDetailsModelClass responseModel =
+            MovieDetailsModelClass.fromJson(response);
+            if (responseModel != null) {
+              movieDetails.value = responseModel;
+            }
           }
-        }
-      });
+        });
+      } else {
+        isApiCall.value = false;
+      }
     });
   }
 }
