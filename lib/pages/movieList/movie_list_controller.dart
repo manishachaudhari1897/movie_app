@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:movie_app/apiservice/api_service.dart';
 import 'package:movie_app/constant/componants.dart';
 import 'package:movie_app/model/genre_model_class.dart';
